@@ -1,0 +1,528 @@
+# 🔍 Microservicio de Procesamiento de PDFs - HAVI Score
+
+Microservicio Python especializado en procesamiento avanzado de documentos PDF para el sistema de scoring crediticio HAVI. Extrae texto e imágenes de documentos financieros para facilitar el análisis de IA.
+
+## 🎯 Características
+
+- **Procesamiento de PDFs**: Extracción de texto nativo y conversión a imágenes
+- **OCR Avanzado**: Doble motor (Tesseract + EasyOCR) para máxima precisión
+- **Procesamiento de Imágenes**: Optimización automática para mejorar OCR
+- **Extracción de Datos**: Datos estructurados según tipo de documento
+- **Alta Performance**: Procesamiento asíncrono y optimizado
+- **API REST**: Integración fácil con cualquier backend
+
+## 🏗️ Arquitectura
+
+```
+pdf-processor-service/
+├── main.py                     # Aplicación FastAPI principal
+├── models/
+│   └── schemas.py              # Modelos Pydantic
+├── services/
+│   ├── pdf_processor.py        # Procesamiento de PDFs
+│   ├── ocr_service.py          # OCR (Tesseract + EasyOCR)
+│   ├── image_processor.py      # Procesamiento de imágenes
+│   └── data_extractor.py       # Extracción de datos estructurados
+├── Dockerfile                  # Imagen Docker
+├── docker-compose.yml          # Orquestación
+├── requirements.txt            # Dependencias Python
+└── README.md                   # Documentación
+```
+
+## 🚀 Instalación
+
+### Opción 1: Docker (Recomendado)
+
+```bash
+# Construir imagen
+docker-compose build
+
+# Iniciar servicio
+docker-compose up -d
+
+# Ver logs
+docker-compose logs -f
+```
+
+El servicio estará disponible en: `http://localhost:8000`
+
+### Opción 2: Instalación Local
+
+#### Requisitos del Sistema
+
+- Python 3.11+
+- Tesseract OCR
+- Poppler (para pdf2image)
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get update
+sudo apt-get install -y tesseract-ocr tesseract-ocr-spa tesseract-ocr-eng poppler-utils
+```
+
+**macOS:**
+```bash
+brew install tesseract tesseract-lang poppler
+```
+
+**Windows:**
+- Instalar Tesseract: https://github.com/UB-Mannheim/tesseract/wiki
+- Instalar Poppler: https://blog.alivate.com.au/poppler-windows/
+
+#### Instalación de Python
+
+```bash
+# Crear entorno virtual
+python -m venv venv
+
+# Activar entorno
+source venv/bin/activate  # Linux/Mac
+# o
+venv\Scripts\activate  # Windows
+
+# Instalar dependencias
+pip install -r requirements.txt
+
+# Ejecutar servicio
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+## 📚 API Endpoints
+
+### 1. Health Check
+
+```bash
+GET /health
+```
+
+**Respuesta:**
+```json
+{
+  "status": "healthy",
+  "services": {
+    "pdf_processor": "ready",
+    "ocr_service": "ready",
+    "image_processor": "ready"
+  }
+}
+```
+
+### 2. Procesar PDF
+
+```bash
+POST /process-pdf
+Content-Type: multipart/form-data
+
+file: [PDF file]
+document_type: bank_statement
+use_advanced_ocr: true
+extract_images: true
+```
+
+**Ejemplo con curl:**
+```bash
+curl -X POST http://localhost:8000/process-pdf \
+  -F "file=@estado_cuenta.pdf" \
+  -F "document_type=bank_statement" \
+  -F "use_advanced_ocr=true" \
+  -F "extract_images=true"
+```
+
+**Respuesta:**
+```json
+{
+  "filename": "estado_cuenta.pdf",
+  "document_type": "bank_statement",
+  "num_pages": 3,
+  "extracted_text": "Texto extraído del PDF...",
+  "native_text": "Texto nativo del PDF...",
+  "ocr_text": "Texto adicional del OCR...",
+  "ocr_confidence": 92.5,
+  "num_images": 3,
+  "num_extracted_images": 2,
+  "text_length": 5420,
+  "processing_method": "native",
+  "document_analysis": {
+    "keywords_found": ["banco", "saldo", "cuenta", "balance"],
+    "estimated_quality": "high",
+    "suggestions": []
+  },
+  "success": true
+}
+```
+
+### 3. Procesar Imagen
+
+```bash
+POST /process-image
+Content-Type: multipart/form-data
+
+file: [Image file]
+use_advanced_ocr: true
+```
+
+**Ejemplo:**
+```bash
+curl -X POST http://localhost:8000/process-image \
+  -F "file=@ine.jpg" \
+  -F "use_advanced_ocr=true"
+```
+
+**Respuesta:**
+```json
+{
+  "filename": "ine.jpg",
+  "text": "INSTITUTO NACIONAL ELECTORAL...",
+  "confidence": 88.3,
+  "method": "easyocr",
+  "success": true
+}
+```
+
+### 4. Extraer Datos Estructurados
+
+```bash
+POST /extract-structured-data
+Content-Type: multipart/form-data
+
+file: [PDF file]
+document_type: bank_statement
+```
+
+**Ejemplo:**
+```bash
+curl -X POST http://localhost:8000/extract-structured-data \
+  -F "file=@estado_cuenta.pdf" \
+  -F "document_type=bank_statement"
+```
+
+**Respuesta:**
+```json
+{
+  "document_type": "bank_statement",
+  "extracted_data": {
+    "bank_name": "BBVA",
+    "account_number": "0123456789",
+    "balance": 45000.0,
+    "monthly_income": 25000.0,
+    "monthly_expenses": 18000.0,
+    "savings_rate": 28.0,
+    "account_holder": "JUAN PEREZ GARCIA"
+  },
+  "confidence": 92.5,
+  "analysis": {
+    "keywords_found": ["banco", "saldo", "cuenta", "balance"],
+    "estimated_quality": "high"
+  }
+}
+```
+
+## 📄 Tipos de Documentos Soportados
+
+| Tipo | Código | Datos Extraídos |
+|------|--------|-----------------|
+| Estado de Cuenta | `bank_statement` | Banco, cuenta, saldo, ingresos, gastos |
+| Recibo de Nómina | `payroll` | RFC, empresa, salario bruto/neto, periodo |
+| Identificación | `id_document` | CURP, nombre, domicilio, vigencia |
+| Declaración Fiscal | `tax_return` | RFC, ingresos anuales, año fiscal |
+| Comprobante Domicilio | `proof_of_address` | Dirección, titular, tipo de servicio |
+| Carta Laboral | `employment_letter` | Empresa, puesto, fecha de ingreso |
+
+## 🔧 Integración con Backend AdonisJS
+
+### Crear Servicio de Integración
+
+Crear archivo: `app/services/pdf_processor_client.ts`
+
+```typescript
+import axios from 'axios'
+import FormData from 'form-data'
+import fs from 'fs'
+
+class PdfProcessorClient {
+  private baseUrl: string
+
+  constructor() {
+    this.baseUrl = process.env.PDF_PROCESSOR_URL || 'http://localhost:8000'
+  }
+
+  /**
+   * Procesa un PDF y extrae texto
+   */
+  async processPdf(
+    filePath: string,
+    documentType: string,
+    useAdvancedOcr: boolean = true
+  ): Promise<any> {
+    try {
+      const formData = new FormData()
+      formData.append('file', fs.createReadStream(filePath))
+      formData.append('document_type', documentType)
+      formData.append('use_advanced_ocr', useAdvancedOcr.toString())
+      formData.append('extract_images', 'true')
+
+      const response = await axios.post(`${this.baseUrl}/process-pdf`, formData, {
+        headers: formData.getHeaders(),
+        timeout: 120000 // 2 minutos
+      })
+
+      return response.data
+    } catch (error) {
+      console.error('Error procesando PDF:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Extrae datos estructurados de un PDF
+   */
+  async extractStructuredData(filePath: string, documentType: string): Promise<any> {
+    try {
+      const formData = new FormData()
+      formData.append('file', fs.createReadStream(filePath))
+      formData.append('document_type', documentType)
+
+      const response = await axios.post(
+        `${this.baseUrl}/extract-structured-data`,
+        formData,
+        {
+          headers: formData.getHeaders(),
+          timeout: 120000
+        }
+      )
+
+      return response.data
+    } catch (error) {
+      console.error('Error extrayendo datos:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Verifica salud del servicio
+   */
+  async healthCheck(): Promise<boolean> {
+    try {
+      const response = await axios.get(`${this.baseUrl}/health`, { timeout: 5000 })
+      return response.data.status === 'healthy'
+    } catch (error) {
+      return false
+    }
+  }
+}
+
+export const pdfProcessorClient = new PdfProcessorClient()
+```
+
+### Actualizar Document Extraction Service
+
+Modificar `app/services/document_extraction_service.ts`:
+
+```typescript
+import { pdfProcessorClient } from '#services/pdf_processor_client'
+
+class DocumentExtractionService {
+  private async getDocumentText(documentUpload: DocumentUpload): Promise<string | null> {
+    try {
+      // Intentar usar el microservicio Python primero
+      const isHealthy = await pdfProcessorClient.healthCheck()
+
+      if (isHealthy) {
+        console.log('🐍 Usando microservicio Python para procesamiento...')
+
+        // Descargar archivo de S3 temporalmente
+        const tempFilePath = await this.downloadFromS3(documentUpload.filePath)
+
+        // Procesar con microservicio
+        const result = await pdfProcessorClient.processPdf(
+          tempFilePath,
+          documentUpload.documentType,
+          true // usar OCR avanzado
+        )
+
+        console.log(`✅ Texto extraído: ${result.text_length} caracteres, confianza: ${result.ocr_confidence}%`)
+
+        // Limpiar archivo temporal
+        await fs.unlink(tempFilePath)
+
+        return result.extracted_text
+      } else {
+        console.log('⚠️ Microservicio no disponible, usando método tradicional')
+        // Fallback al método existente
+        return await this.extractTextTraditional(documentUpload)
+      }
+    } catch (error) {
+      console.error('Error con microservicio:', error)
+      // Fallback
+      return await this.extractTextTraditional(documentUpload)
+    }
+  }
+}
+```
+
+### Variables de Entorno
+
+Agregar a `.env`:
+
+```bash
+# Microservicio PDF Processor
+PDF_PROCESSOR_URL=http://localhost:8000
+PDF_PROCESSOR_ENABLED=true
+```
+
+## 🧪 Testing
+
+### Test Manual con curl
+
+```bash
+# 1. Health check
+curl http://localhost:8000/health
+
+# 2. Procesar PDF de prueba
+curl -X POST http://localhost:8000/process-pdf \
+  -F "file=@test.pdf" \
+  -F "document_type=bank_statement" \
+  -F "use_advanced_ocr=true"
+
+# 3. Procesar imagen
+curl -X POST http://localhost:8000/process-image \
+  -F "file=@test.jpg" \
+  -F "use_advanced_ocr=true"
+```
+
+### Test con Python
+
+```python
+import requests
+
+# Procesar PDF
+with open('estado_cuenta.pdf', 'rb') as f:
+    files = {'file': f}
+    data = {
+        'document_type': 'bank_statement',
+        'use_advanced_ocr': 'true'
+    }
+    response = requests.post('http://localhost:8000/process-pdf', files=files, data=data)
+    print(response.json())
+```
+
+## 🔍 Comparación OCR: Tesseract vs EasyOCR
+
+| Característica | Tesseract (Básico) | EasyOCR (Avanzado) |
+|----------------|--------------------|--------------------|
+| Velocidad | ⚡ Rápido (1-2 seg/página) | 🐢 Más lento (3-5 seg/página) |
+| Precisión | 📊 70-85% | 📊 85-95% |
+| Idiomas | ✅ Español + Inglés | ✅ 80+ idiomas |
+| GPU | ❌ No soportado | ✅ Aceleración GPU |
+| Uso de Memoria | 💚 Bajo (~100 MB) | 💛 Alto (~500 MB) |
+| Mejor para | Documentos limpios | Documentos complejos |
+
+**Recomendación**: Usar EasyOCR para documentos críticos (INE, estados de cuenta) y Tesseract para documentos simples.
+
+## ⚙️ Configuración Avanzada
+
+### Optimizar para Producción
+
+```python
+# En main.py, configurar workers
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=8000,
+        workers=4,  # Múltiples workers
+        log_level="info"
+    )
+```
+
+### Configurar Timeout
+
+```python
+# En docker-compose.yml
+environment:
+  - TIMEOUT_SECONDS=180  # 3 minutos para PDFs grandes
+```
+
+## 📊 Monitoreo
+
+### Logs
+
+```bash
+# Ver logs en tiempo real
+docker-compose logs -f pdf-processor
+
+# Filtrar errores
+docker-compose logs pdf-processor | grep ERROR
+```
+
+### Métricas
+
+El servicio loguea información útil:
+
+```
+📄 Procesando PDF: estado_cuenta.pdf, tipo: bank_statement
+📁 Archivo guardado temporalmente
+📝 Extrayendo texto nativo...
+📊 PDF Info: 3 páginas
+🖼️ Convirtiendo PDF a imágenes...
+✅ Generadas 3 imágenes
+🔍 Texto nativo insuficiente, aplicando OCR...
+✨ OCR avanzado completado - Confianza: 92.5%
+✅ Procesamiento completado - 5420 caracteres extraídos
+```
+
+## 🛠️ Troubleshooting
+
+### Error: Tesseract no encontrado
+
+```bash
+# Ubuntu/Debian
+sudo apt-get install tesseract-ocr tesseract-ocr-spa
+
+# Verificar instalación
+tesseract --version
+```
+
+### Error: Poppler no instalado
+
+```bash
+# Ubuntu/Debian
+sudo apt-get install poppler-utils
+
+# Verificar
+pdftoppm -v
+```
+
+### Error: Out of Memory con EasyOCR
+
+Reducir resolución de imágenes en `services/pdf_processor.py`:
+
+```python
+self.dpi = 200  # En lugar de 300
+```
+
+## 🚀 Performance
+
+### Tiempos de Procesamiento Estimados
+
+| Tipo | Páginas | Tesseract | EasyOCR |
+|------|---------|-----------|---------|
+| PDF con texto nativo | 3 | 1 seg | 1 seg |
+| PDF escaneado | 3 | 6 seg | 15 seg |
+| Imagen alta calidad | 1 | 2 seg | 5 seg |
+
+### Optimizaciones
+
+1. **Usar texto nativo cuando sea posible** - El servicio automáticamente detecta y usa texto nativo del PDF
+2. **Caché de modelos EasyOCR** - Los modelos se cargan una vez y se reutilizan
+3. **Procesamiento paralelo** - Usar múltiples workers en producción
+4. **Reducir DPI para PDFs grandes** - Configurar DPI según necesidad
+
+## 📝 Licencia
+
+Propiedad de HAVI / LIVO - Todos los derechos reservados.
+
+## 🤝 Soporte
+
+Para problemas o dudas, contactar al equipo de desarrollo.
