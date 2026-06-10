@@ -55,3 +55,9 @@ htmlcov/
 
 # EasyOCR models
 .EasyOCR/
+
+# Archivos subidos/procesados
+uploads/
+
+# Artefacto fantasma de Windows
+nul

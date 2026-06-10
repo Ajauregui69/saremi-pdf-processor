@@ -3,7 +3,7 @@ version: '3.8'
 services:
   pdf-processor:
     build: .
-    container_name: livo-pdf-processor
+    container_name: saremi-pdf-processor
     ports:
       - "8000:8000"
     environment:
@@ -22,8 +22,8 @@ services:
       retries: 3
       start_period: 40s
     networks:
-      - livo-network
+      - saremi-network
 
 networks:
-  livo-network:
+  saremi-network:
     driver: bridge

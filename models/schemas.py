@@ -28,6 +28,7 @@ class ProcessedDocument(BaseModel):
     ocr_confidence: float = Field(default=0.0, description="Confianza del OCR (0-100)")
     num_images: int = Field(default=0, description="Número de imágenes generadas")
     num_extracted_images: int = Field(default=0, description="Número de imágenes embebidas extraídas")
+    extracted_images_base64: List[str] = Field(default_factory=list, description="Imágenes embebidas en base64")
     text_length: int = Field(..., description="Longitud del texto extraído")
     processing_method: str = Field(..., description="Método usado (native/ocr)")
     document_analysis: Dict = Field(default_factory=dict, description="Análisis del documento")
