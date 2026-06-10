@@ -2,6 +2,11 @@
 
 Microservicio Python independiente, especializado en procesamiento avanzado y verificación de documentos PDF. Extrae texto e imágenes de documentos y los valida para facilitar el análisis de IA. Se integra con cualquier backend vía API REST.
 
+> Servicio **independiente**: cualquier sistema puede consumirlo vía API REST con su `X-API-Key`.
+> Para desarrollo dentro del holding, [holding-docker](https://github.com/Ajauregui69/holding-docker)
+> lo levanta junto al resto del stack (`docker-compose.saremi.yml`, monorepo: backend FastAPI en la raíz,
+> frontend React en `frontend/`). Flujo de ramas y PRs: `GIT-WORKFLOW.md` en ese repo.
+
 ## 🎯 Características
 
 - **Procesamiento de PDFs**: Extracción de texto nativo y conversión a imágenes
