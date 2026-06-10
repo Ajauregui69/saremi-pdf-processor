@@ -1,22 +1,22 @@
-﻿# HAVI PDF Processor - Deployment Guide
+# SarEmi PDF Processor - Deployment Guide
 
-Microservicio Python para procesamiento de documentos PDF, OCR y extracciÃ³n de datos para HAVI.
+Microservicio Python para procesamiento de documentos PDF, OCR y extracción de datos — servicio independiente.
 
-## ðŸ“‹ Requisitos
+## 📋 Requisitos
 
 - Python 3.9+
 - Tesseract OCR
 - Poppler (para pdf2image)
 - 1GB+ RAM (2GB recomendado)
 
-## ðŸš€ Deployment en Digital Ocean
+## 🚀 Deployment en Digital Ocean
 
-### OpciÃ³n 1: Droplet Simple (Recomendado para empezar)
+### Opción 1: Droplet Simple (Recomendado para empezar)
 
 1. **Crear Droplet**
    ```bash
    # Ubuntu 22.04 LTS
-   # 1GB RAM mÃ­nimo ($6/mes)
+   # 1GB RAM mínimo ($6/mes)
    # 2GB RAM recomendado ($12/mes)
    ```
 
@@ -35,7 +35,7 @@ Microservicio Python para procesamiento de documentos PDF, OCR y extracciÃ³n d
    sudo apt install poppler-utils -y
    ```
 
-3. **Deploy de la aplicaciÃ³n**
+3. **Deploy de la aplicación**
    ```bash
    # Clonar repo
    cd /opt
@@ -51,7 +51,7 @@ Microservicio Python para procesamiento de documentos PDF, OCR y extracciÃ³n d
 
    # Configurar variables de entorno
    cp .env.example .env
-   nano .env  # Editar segÃºn necesidades
+   nano .env  # Editar según necesidades
    ```
 
 4. **Configurar como servicio systemd**
@@ -62,7 +62,7 @@ Microservicio Python para procesamiento de documentos PDF, OCR y extracciÃ³n d
    Contenido:
    ```ini
    [Unit]
-   Description=HAVI PDF Processor Service
+   Description=SarEmi PDF Processor Service
    After=network.target
 
    [Service]
@@ -96,7 +96,7 @@ Microservicio Python para procesamiento de documentos PDF, OCR y extracciÃ³n d
    ```nginx
    server {
        listen 80;
-       server_name pdf.havi.app;  # Tu subdominio
+       server_name pdf.tudominio.com;  # Tu subdominio
 
        location / {
            proxy_pass http://localhost:8001;
@@ -124,10 +124,10 @@ Microservicio Python para procesamiento de documentos PDF, OCR y extracciÃ³n d
 6. **Configurar SSL con Let's Encrypt**
    ```bash
    sudo apt install certbot python3-certbot-nginx -y
-   sudo certbot --nginx -d pdf.havi.app
+   sudo certbot --nginx -d pdf.tudominio.com
    ```
 
-### OpciÃ³n 2: Docker (MÃ¡s moderno)
+### Opción 2: Docker (Más moderno)
 
 1. **Instalar Docker**
    ```bash
@@ -150,7 +150,7 @@ Microservicio Python para procesamiento de documentos PDF, OCR y extracciÃ³n d
    docker-compose up -d
    ```
 
-### OpciÃ³n 3: Digital Ocean App Platform (Auto-scaling)
+### Opción 3: Digital Ocean App Platform (Auto-scaling)
 
 1. Crear `app.yaml`:
    ```yaml
@@ -170,11 +170,11 @@ Microservicio Python para procesamiento de documentos PDF, OCR y extracciÃ³n d
        http_path: /health
    ```
 
-2. Deploy vÃ­a CLI o UI de Digital Ocean
+2. Deploy vía CLI o UI de Digital Ocean
 
-## ðŸ”’ Seguridad
+## 🔒 Seguridad
 
-1. **Crear API Key para autenticaciÃ³n**
+1. **Crear API Key para autenticación**
    ```bash
    # Generar API key segura
    openssl rand -hex 32
@@ -198,7 +198,7 @@ Microservicio Python para procesamiento de documentos PDF, OCR y extracciÃ³n d
    })
    ```
 
-## ðŸ“Š Monitoreo
+## 📊 Monitoreo
 
 ### Logs
 ```bash
@@ -214,10 +214,10 @@ docker logs -f pdf-processor
 curl http://localhost:8001/health
 ```
 
-### MÃ©tricas (Opcional)
+### Métricas (Opcional)
 Instalar Prometheus + Grafana para monitoreo avanzado
 
-## ðŸ”„ Updates
+## 🔄 Updates
 
 ```bash
 cd /opt/saremi-pdf-processor
@@ -227,16 +227,16 @@ pip install -r requirements.txt
 sudo systemctl restart saremi-pdf-processor
 ```
 
-## ðŸ’° Costos Estimados
+## 💰 Costos Estimados
 
-| OpciÃ³n | Costo Mensual | Escalabilidad |
+| Opción | Costo Mensual | Escalabilidad |
 |--------|--------------|---------------|
 | Droplet 1GB | $6 | Manual |
 | Droplet 2GB | $12 | Manual |
 | App Platform | $5-15 | Auto |
 | Kubernetes | $12+ | Auto |
 
-## ðŸ› Troubleshooting
+## 🐛 Troubleshooting
 
 ### Error: No module named 'tesseract'
 ```bash
@@ -249,15 +249,15 @@ sudo apt install poppler-utils -y
 ```
 
 ### Alto uso de CPU/RAM
-- Aumentar tamaÃ±o del droplet
+- Aumentar tamaño del droplet
 - Implementar cola de trabajos con Redis/Celery
 - Limitar procesamiento concurrente
 
-## ðŸ“ PrÃ³ximos pasos
+## 📝 Próximos pasos
 
-1. âœ… Separar microservicio en repo independiente
-2. â¬œ Configurar CI/CD con GitHub Actions
-3. â¬œ Implementar cola de procesamiento con Redis
-4. â¬œ Agregar mÃ©tricas y alertas
-5. â¬œ Implementar rate limiting
-6. â¬œ Cache de resultados frecuentes
+1. ✅ Separar microservicio en repo independiente
+2. ⬜ Configurar CI/CD con GitHub Actions
+3. ⬜ Implementar cola de procesamiento con Redis
+4. ⬜ Agregar métricas y alertas
+5. ⬜ Implementar rate limiting
+6. ⬜ Cache de resultados frecuentes

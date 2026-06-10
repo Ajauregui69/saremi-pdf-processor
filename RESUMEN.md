@@ -1,32 +1,32 @@
-﻿# ðŸ“Š Resumen Ejecutivo - Microservicio PDF Processor
+# 📊 Resumen Ejecutivo - Microservicio PDF Processor
 
-## ðŸŽ¯ Â¿QuÃ© es?
+## 🎯 ¿Qué es?
 
-Un **microservicio Python** especializado en procesamiento avanzado de documentos PDF y extracciÃ³n de datos para el sistema HAVI Score de scoring crediticio.
+Un **microservicio Python** especializado en procesamiento avanzado de documentos PDF y extracción de datos — servicio independiente, consumible por cualquier backend vía API REST.
 
-## âœ¨ CaracterÃ­sticas Principales
+## ✨ Características Principales
 
-| CaracterÃ­stica | DescripciÃ³n |
+| Característica | Descripción |
 |----------------|-------------|
-| ðŸ” **OCR Dual** | Tesseract (rÃ¡pido) + EasyOCR (preciso) |
-| ðŸ“„ **Procesamiento PDF** | Texto nativo + conversiÃ³n a imÃ¡genes |
-| ðŸ–¼ï¸ **OptimizaciÃ³n de ImÃ¡genes** | CLAHE, denoise, sharpening, binarizaciÃ³n |
-| ðŸ“Š **Datos Estructurados** | ExtracciÃ³n especÃ­fica por tipo de documento |
-| âš¡ **API REST** | FastAPI con documentaciÃ³n automÃ¡tica |
-| ðŸ³ **Docker Ready** | Deploy con un comando |
-| ðŸ”„ **Fallback AutomÃ¡tico** | Si falla, backend usa mÃ©todo tradicional |
+| 🔍 **OCR Dual** | Tesseract (rápido) + EasyOCR (preciso) |
+| 📄 **Procesamiento PDF** | Texto nativo + conversión a imágenes |
+| 🖼️ **Optimización de Imágenes** | CLAHE, denoise, sharpening, binarización |
+| 📊 **Datos Estructurados** | Extracción específica por tipo de documento |
+| ⚡ **API REST** | FastAPI con documentación automática |
+| 🐳 **Docker Ready** | Deploy con un comando |
+| 🔄 **Fallback Automático** | Si falla, backend usa método tradicional |
 
-## ðŸ“ˆ Mejoras vs MÃ©todo Actual
+## 📈 Mejoras vs Método Actual
 
-| MÃ©trica | MÃ©todo Actual | Con Microservicio | Mejora |
+| Métrica | Método Actual | Con Microservicio | Mejora |
 |---------|---------------|-------------------|---------|
-| PrecisiÃ³n OCR | 70-85% | 85-95% | +10-15% |
-| Preprocesamiento | BÃ¡sico | Avanzado (CV) | âœ… |
+| Precisión OCR | 70-85% | 85-95% | +10-15% |
+| Preprocesamiento | Básico | Avanzado (CV) | ✅ |
 | Tipos de OCR | 1 (Tesseract) | 2 (Tesseract + EasyOCR) | 2x |
-| Escalabilidad | Limitada | Alta (contenedor) | âœ… |
+| Escalabilidad | Limitada | Alta (contenedor) | ✅ |
 | Tiempo procesamiento | 2-4 seg | 5-8 seg | +3-4 seg |
 
-## ðŸš€ Inicio RÃ¡pido
+## 🚀 Inicio Rápido
 
 ```bash
 # 1. Ir al directorio
@@ -39,30 +39,30 @@ docker-compose up -d
 curl http://localhost:8000/health
 ```
 
-âœ… **Listo!** Ya estÃ¡ corriendo en puerto 8000
+✅ **Listo!** Ya está corriendo en puerto 8000
 
-## ðŸ“ Archivos Creados
+## 📁 Archivos Creados
 
 ```
 pdf-processor-service/
-â”œâ”€â”€ main.py                    # ðŸ”¥ App FastAPI principal
-â”œâ”€â”€ models/schemas.py          # ðŸ“ Modelos de datos
-â”œâ”€â”€ services/
-â”‚   â”œâ”€â”€ pdf_processor.py       # ðŸ“„ Procesamiento PDF
-â”‚   â”œâ”€â”€ ocr_service.py         # ðŸ” OCR (Tesseract + EasyOCR)
-â”‚   â”œâ”€â”€ image_processor.py     # ðŸŽ¨ Procesamiento imÃ¡genes
-â”‚   â””â”€â”€ data_extractor.py      # ðŸ“Š ExtracciÃ³n estructurada
-â”œâ”€â”€ Dockerfile                 # ðŸ³ Imagen Docker
-â”œâ”€â”€ docker-compose.yml         # ðŸŽ¼ OrquestaciÃ³n
-â”œâ”€â”€ requirements.txt           # ðŸ“¦ Dependencias
-â”œâ”€â”€ README.md                  # ðŸ“– DocumentaciÃ³n completa
-â”œâ”€â”€ QUICK_START.md             # âš¡ Inicio rÃ¡pido
-â”œâ”€â”€ ESTRUCTURA.md              # ðŸ—ï¸ Arquitectura
-â”œâ”€â”€ EJEMPLOS.md                # ðŸ’¡ Casos de uso
-â””â”€â”€ test_service.py            # ðŸ§ª Script de pruebas
+├── main.py                    # 🔥 App FastAPI principal
+├── models/schemas.py          # 📝 Modelos de datos
+├── services/
+│   ├── pdf_processor.py       # 📄 Procesamiento PDF
+│   ├── ocr_service.py         # 🔍 OCR (Tesseract + EasyOCR)
+│   ├── image_processor.py     # 🎨 Procesamiento imágenes
+│   └── data_extractor.py      # 📊 Extracción estructurada
+├── Dockerfile                 # 🐳 Imagen Docker
+├── docker-compose.yml         # 🎼 Orquestación
+├── requirements.txt           # 📦 Dependencias
+├── README.md                  # 📖 Documentación completa
+├── QUICK_START.md             # ⚡ Inicio rápido
+├── ESTRUCTURA.md              # 🏗️ Arquitectura
+├── EJEMPLOS.md                # 💡 Casos de uso
+└── test_service.py            # 🧪 Script de pruebas
 ```
 
-## ðŸ”— IntegraciÃ³n con Backend
+## 🔗 Integración con Backend
 
 ### Variables de Entorno (.env)
 
@@ -71,44 +71,44 @@ PDF_PROCESSOR_URL=http://localhost:8000
 PDF_PROCESSOR_ENABLED=true
 ```
 
-### Cliente de IntegraciÃ³n
+### Cliente de Integración
 
 Crear: `app/services/pdf_processor_client.ts`
 
 Ver archivo completo en: `INTEGRACION_PDF_PROCESSOR.md`
 
-### Flujo de IntegraciÃ³n
+### Flujo de Integración
 
 ```
 Usuario sube PDF
-    â†“
+    ↓
 Backend AdonisJS
-    â†“
-Â¿Microservicio disponible?
-    â”œâ”€ SÃ â†’ Procesar con Python (mejor precisiÃ³n)
-    â””â”€ NO â†’ Procesar con mÃ©todo tradicional
-    â†“
-Datos extraÃ­dos
-    â†“
+    ↓
+¿Microservicio disponible?
+    ├─ SÍ → Procesar con Python (mejor precisión)
+    └─ NO → Procesar con método tradicional
+    ↓
+Datos extraídos
+    ↓
 MoonshotAI analiza
-    â†“
-HAVI Score calculado
+    ↓
+Score calculado por el sistema cliente
 ```
 
-## ðŸ“Š Tipos de Documentos Soportados
+## 📊 Tipos de Documentos Soportados
 
-| Tipo | CÃ³digo | Datos ExtraÃ­dos |
+| Tipo | Código | Datos Extraídos |
 |------|--------|-----------------|
-| ðŸ¦ Estado de Cuenta | `bank_statement` | Banco, saldo, ingresos, gastos |
-| ðŸ’° NÃ³mina | `payroll` | RFC, empresa, salario bruto/neto |
-| ðŸªª INE/IFE | `id_document` | CURP, nombre, domicilio |
-| ðŸ“‹ DeclaraciÃ³n Fiscal | `tax_return` | RFC, ingresos anuales |
-| ðŸ  Comprobante Domicilio | `proof_of_address` | DirecciÃ³n, titular |
-| ðŸ’¼ Carta Laboral | `employment_letter` | Empresa, puesto |
+| 🏦 Estado de Cuenta | `bank_statement` | Banco, saldo, ingresos, gastos |
+| 💰 Nómina | `payroll` | RFC, empresa, salario bruto/neto |
+| 🪪 INE/IFE | `id_document` | CURP, nombre, domicilio |
+| 📋 Declaración Fiscal | `tax_return` | RFC, ingresos anuales |
+| 🏠 Comprobante Domicilio | `proof_of_address` | Dirección, titular |
+| 💼 Carta Laboral | `employment_letter` | Empresa, puesto |
 
-## ðŸŽ¯ Casos de Uso
+## 🎯 Casos de Uso
 
-### 1. AnÃ¡lisis Crediticio
+### 1. Análisis Crediticio
 
 ```typescript
 const result = await pdfProcessorClient.extractStructuredData(
@@ -123,7 +123,7 @@ const result = await pdfProcessorClient.extractStructuredData(
 // - Tasa de ahorro
 ```
 
-### 2. ValidaciÃ³n de INE
+### 2. Validación de INE
 
 ```typescript
 const result = await pdfProcessorClient.processPdf(
@@ -135,11 +135,11 @@ const result = await pdfProcessorClient.processPdf(
 // Extrae:
 // - CURP
 // - Nombre
-// - DirecciÃ³n
+// - Dirección
 // - Vigencia
 ```
 
-### 3. VerificaciÃ³n de NÃ³mina
+### 3. Verificación de Nómina
 
 ```typescript
 const result = await pdfProcessorClient.extractStructuredData(
@@ -154,17 +154,17 @@ const result = await pdfProcessorClient.extractStructuredData(
 // - Periodo de pago
 ```
 
-## âš¡ Performance
+## ⚡ Performance
 
-| OperaciÃ³n | Tiempo | PrecisiÃ³n |
+| Operación | Tiempo | Precisión |
 |-----------|--------|-----------|
 | PDF con texto nativo | 1-2 seg | 95-100% |
 | PDF escaneado (Tesseract) | 5-8 seg | 70-85% |
 | PDF escaneado (EasyOCR) | 12-18 seg | 85-95% |
 
-**RecomendaciÃ³n**: Usar EasyOCR para documentos crÃ­ticos (INE, estados de cuenta)
+**Recomendación**: Usar EasyOCR para documentos críticos (INE, estados de cuenta)
 
-## ðŸ” Endpoints API
+## 🔍 Endpoints API
 
 ### GET /health
 Health check del servicio
@@ -176,14 +176,14 @@ Procesar PDF y extraer texto
 Procesar imagen con OCR
 
 ### POST /extract-structured-data
-Extraer datos estructurados segÃºn tipo de documento
+Extraer datos estructurados según tipo de documento
 
-**DocumentaciÃ³n completa**: http://localhost:8000/docs
+**Documentación completa**: http://localhost:8000/docs
 
-## ðŸ§ª Testing
+## 🧪 Testing
 
 ```bash
-# Test bÃ¡sico
+# Test básico
 python test_service.py /path/to/document.pdf
 
 # Test con curl
@@ -192,7 +192,7 @@ curl -X POST http://localhost:8000/process-pdf \
   -F "document_type=bank_statement"
 ```
 
-## ðŸ³ Despliegue
+## 🐳 Despliegue
 
 ### Desarrollo
 
@@ -200,55 +200,55 @@ curl -X POST http://localhost:8000/process-pdf \
 docker-compose up
 ```
 
-### ProducciÃ³n
+### Producción
 
 ```bash
 docker-compose -f docker-compose.prod.yml up -d
 ```
 
-## ðŸ“ˆ Ventajas
+## 📈 Ventajas
 
-âœ… **Mayor precisiÃ³n**: OCR avanzado mejora extracciÃ³n
-âœ… **Escalable**: Microservicio independiente
-âœ… **Fallback robusto**: Nunca falla completamente
-âœ… **FÃ¡cil mantenimiento**: Python para procesamiento de imÃ¡genes
-âœ… **MÃ©tricas separadas**: Monitoreo independiente
-âœ… **Cache friendly**: Resultados cacheables
+✅ **Mayor precisión**: OCR avanzado mejora extracción
+✅ **Escalable**: Microservicio independiente
+✅ **Fallback robusto**: Nunca falla completamente
+✅ **Fácil mantenimiento**: Python para procesamiento de imágenes
+✅ **Métricas separadas**: Monitoreo independiente
+✅ **Cache friendly**: Resultados cacheables
 
-## ðŸŽ“ PrÃ³ximos Pasos
+## 🎓 Próximos Pasos
 
-1. âœ… **Servicio creado y documentado**
-2. ðŸ“ **Probar con documentos reales**
-3. ðŸ”§ **Ajustar parÃ¡metros segÃºn resultados**
-4. ðŸ“Š **Comparar con mÃ©todo tradicional**
-5. ðŸš€ **Desplegar a producciÃ³n**
+1. ✅ **Servicio creado y documentado**
+2. 📝 **Probar con documentos reales**
+3. 🔧 **Ajustar parámetros según resultados**
+4. 📊 **Comparar con método tradicional**
+5. 🚀 **Desplegar a producción**
 
-## ðŸ“š DocumentaciÃ³n
+## 📚 Documentación
 
-- **README.md**: GuÃ­a completa del servicio
-- **QUICK_START.md**: Inicio rÃ¡pido
-- **INTEGRACION_PDF_PROCESSOR.md**: IntegraciÃ³n con backend
+- **README.md**: Guía completa del servicio
+- **QUICK_START.md**: Inicio rápido
+- **INTEGRACION_PDF_PROCESSOR.md**: Integración con backend
 - **ESTRUCTURA.md**: Arquitectura del proyecto
-- **EJEMPLOS.md**: Casos de uso prÃ¡cticos
+- **EJEMPLOS.md**: Casos de uso prácticos
 
-## ðŸ’¡ Recomendaciones
+## 💡 Recomendaciones
 
 1. **Usar Docker** para evitar problemas de dependencias
 2. **Habilitar cache** para documentos repetidos
 3. **Procesar en background** para PDFs grandes
 4. **Monitorear memoria** con EasyOCR
-5. **A/B testing** con mÃ©todo tradicional
+5. **A/B testing** con método tradicional
 
-## ðŸ”§ TecnologÃ­as
+## 🔧 Tecnologías
 
 - **FastAPI** - Framework web
 - **PyPDF2** - Lectura de PDFs
-- **Tesseract** - OCR bÃ¡sico
+- **Tesseract** - OCR básico
 - **EasyOCR** - OCR avanzado
-- **OpenCV** - Procesamiento de imÃ¡genes
-- **Docker** - ContenedorizaciÃ³n
+- **OpenCV** - Procesamiento de imágenes
+- **Docker** - Contenedorización
 
-## ðŸ“ž Soporte
+## 📞 Soporte
 
 - **Logs**: `docker-compose logs -f pdf-processor`
 - **Health**: `curl http://localhost:8000/health`
@@ -256,22 +256,22 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ---
 
-## âœ… Checklist de ImplementaciÃ³n
+## ✅ Checklist de Implementación
 
 - [x] Microservicio Python creado
 - [x] Docker configurado
 - [x] API REST implementada
 - [x] OCR dual (Tesseract + EasyOCR)
-- [x] Procesamiento de imÃ¡genes
-- [x] ExtracciÃ³n de datos estructurados
-- [x] DocumentaciÃ³n completa
+- [x] Procesamiento de imágenes
+- [x] Extracción de datos estructurados
+- [x] Documentación completa
 - [x] Scripts de testing
-- [ ] IntegraciÃ³n con backend AdonisJS
+- [ ] Integración con backend AdonisJS
 - [ ] Pruebas con documentos reales
-- [ ] Despliegue a producciÃ³n
+- [ ] Despliegue a producción
 
 ---
 
-**VersiÃ³n**: 1.0.0
+**Versión**: 1.0.0
 **Fecha**: Diciembre 2024
-**Estado**: âœ… Listo para pruebas
+**Estado**: ✅ Listo para pruebas

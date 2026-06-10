@@ -461,12 +461,12 @@ export class CreditAnalysisService {
     }
 
     // Calcular score
-    analysis.overallScore = this.calculateHaviScore(analysis)
+    analysis.overallScore = this.calculateScore(analysis)
 
     return analysis
   }
 
-  private calculateHaviScore(analysis: any): number {
+  private calculateScore(analysis: any): number {
     let score = 300 // Base score
 
     // Analizar estados de cuenta

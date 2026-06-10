@@ -450,7 +450,7 @@ async def register_pending(
     """
     Crea un registro 'processing' antes de que el análisis termine.
     Llamar inmediatamente al recibir el documento; retorna { id } para pasarlo al endpoint real.
-    client_reference_id: identificador del usuario en el sistema del cliente (e.g. userId de HAVI).
+    client_reference_id: identificador del usuario en el sistema del cliente (e.g. el userId en el sistema del cliente).
     """
     ip = request.client.host if request.client else None
     ref_id = client_reference_id.strip() or None

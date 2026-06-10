@@ -211,7 +211,7 @@ Texto extraído → DataExtractor
 Respuesta:
 ```json
 {
-  "service": "HAVI Score PDF Processor",
+  "service": "SarEmi API",
   "status": "running",
   "version": "1.0.0"
 }

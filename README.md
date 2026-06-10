@@ -1,37 +1,37 @@
-﻿# ðŸ” Microservicio de Procesamiento de PDFs - HAVI Score
+# 🔍 SarEmi — Procesamiento y Verificación de PDFs
 
-Microservicio Python especializado en procesamiento avanzado de documentos PDF para el sistema de scoring crediticio HAVI. Extrae texto e imÃ¡genes de documentos financieros para facilitar el anÃ¡lisis de IA.
+Microservicio Python independiente, especializado en procesamiento avanzado y verificación de documentos PDF. Extrae texto e imágenes de documentos y los valida para facilitar el análisis de IA. Se integra con cualquier backend vía API REST.
 
-## ðŸŽ¯ CaracterÃ­sticas
+## 🎯 Características
 
-- **Procesamiento de PDFs**: ExtracciÃ³n de texto nativo y conversiÃ³n a imÃ¡genes
-- **OCR Avanzado**: Doble motor (Tesseract + EasyOCR) para mÃ¡xima precisiÃ³n
-- **Procesamiento de ImÃ¡genes**: OptimizaciÃ³n automÃ¡tica para mejorar OCR
-- **ExtracciÃ³n de Datos**: Datos estructurados segÃºn tipo de documento
-- **Alta Performance**: Procesamiento asÃ­ncrono y optimizado
-- **API REST**: IntegraciÃ³n fÃ¡cil con cualquier backend
+- **Procesamiento de PDFs**: Extracción de texto nativo y conversión a imágenes
+- **OCR Avanzado**: Doble motor (Tesseract + EasyOCR) para máxima precisión
+- **Procesamiento de Imágenes**: Optimización automática para mejorar OCR
+- **Extracción de Datos**: Datos estructurados según tipo de documento
+- **Alta Performance**: Procesamiento asíncrono y optimizado
+- **API REST**: Integración fácil con cualquier backend
 
-## ðŸ—ï¸ Arquitectura
+## 🏗️ Arquitectura
 
 ```
 pdf-processor-service/
-â”œâ”€â”€ main.py                     # AplicaciÃ³n FastAPI principal
-â”œâ”€â”€ models/
-â”‚   â””â”€â”€ schemas.py              # Modelos Pydantic
-â”œâ”€â”€ services/
-â”‚   â”œâ”€â”€ pdf_processor.py        # Procesamiento de PDFs
-â”‚   â”œâ”€â”€ ocr_service.py          # OCR (Tesseract + EasyOCR)
-â”‚   â”œâ”€â”€ image_processor.py      # Procesamiento de imÃ¡genes
-â”‚   â””â”€â”€ data_extractor.py       # ExtracciÃ³n de datos estructurados
-â”œâ”€â”€ Dockerfile                  # Imagen Docker
-â”œâ”€â”€ docker-compose.yml          # OrquestaciÃ³n
-â”œâ”€â”€ requirements.txt            # Dependencias Python
-â””â”€â”€ README.md                   # DocumentaciÃ³n
+├── main.py                     # Aplicación FastAPI principal
+├── models/
+│   └── schemas.py              # Modelos Pydantic
+├── services/
+│   ├── pdf_processor.py        # Procesamiento de PDFs
+│   ├── ocr_service.py          # OCR (Tesseract + EasyOCR)
+│   ├── image_processor.py      # Procesamiento de imágenes
+│   └── data_extractor.py       # Extracción de datos estructurados
+├── Dockerfile                  # Imagen Docker
+├── docker-compose.yml          # Orquestación
+├── requirements.txt            # Dependencias Python
+└── README.md                   # Documentación
 ```
 
-## ðŸš€ InstalaciÃ³n
+## 🚀 Instalación
 
-### OpciÃ³n 1: Docker (Recomendado)
+### Opción 1: Docker (Recomendado)
 
 ```bash
 # Construir imagen
@@ -44,9 +44,9 @@ docker-compose up -d
 docker-compose logs -f
 ```
 
-El servicio estarÃ¡ disponible en: `http://localhost:8000`
+El servicio estará disponible en: `http://localhost:8000`
 
-### OpciÃ³n 2: InstalaciÃ³n Local
+### Opción 2: Instalación Local
 
 #### Requisitos del Sistema
 
@@ -69,7 +69,7 @@ brew install tesseract tesseract-lang poppler
 - Instalar Tesseract: https://github.com/UB-Mannheim/tesseract/wiki
 - Instalar Poppler: https://blog.alivate.com.au/poppler-windows/
 
-#### InstalaciÃ³n de Python
+#### Instalación de Python
 
 ```bash
 # Crear entorno virtual
@@ -87,7 +87,7 @@ pip install -r requirements.txt
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-## ðŸ“š API Endpoints
+## 📚 API Endpoints
 
 ### 1. Health Check
 
@@ -134,7 +134,7 @@ curl -X POST http://localhost:8000/process-pdf \
   "filename": "estado_cuenta.pdf",
   "document_type": "bank_statement",
   "num_pages": 3,
-  "extracted_text": "Texto extraÃ­do del PDF...",
+  "extracted_text": "Texto extraído del PDF...",
   "native_text": "Texto nativo del PDF...",
   "ocr_text": "Texto adicional del OCR...",
   "ocr_confidence": 92.5,
@@ -217,20 +217,20 @@ curl -X POST http://localhost:8000/extract-structured-data \
 }
 ```
 
-## ðŸ“„ Tipos de Documentos Soportados
+## 📄 Tipos de Documentos Soportados
 
-| Tipo | CÃ³digo | Datos ExtraÃ­dos |
+| Tipo | Código | Datos Extraídos |
 |------|--------|-----------------|
 | Estado de Cuenta | `bank_statement` | Banco, cuenta, saldo, ingresos, gastos |
-| Recibo de NÃ³mina | `payroll` | RFC, empresa, salario bruto/neto, periodo |
-| IdentificaciÃ³n | `id_document` | CURP, nombre, domicilio, vigencia |
-| DeclaraciÃ³n Fiscal | `tax_return` | RFC, ingresos anuales, aÃ±o fiscal |
-| Comprobante Domicilio | `proof_of_address` | DirecciÃ³n, titular, tipo de servicio |
+| Recibo de Nómina | `payroll` | RFC, empresa, salario bruto/neto, periodo |
+| Identificación | `id_document` | CURP, nombre, domicilio, vigencia |
+| Declaración Fiscal | `tax_return` | RFC, ingresos anuales, año fiscal |
+| Comprobante Domicilio | `proof_of_address` | Dirección, titular, tipo de servicio |
 | Carta Laboral | `employment_letter` | Empresa, puesto, fecha de ingreso |
 
-## ðŸ”§ IntegraciÃ³n con Backend AdonisJS
+## 🔧 Integración con Backend AdonisJS
 
-### Crear Servicio de IntegraciÃ³n
+### Crear Servicio de Integración
 
 Crear archivo: `app/services/pdf_processor_client.ts`
 
@@ -328,7 +328,7 @@ class DocumentExtractionService {
       const isHealthy = await pdfProcessorClient.healthCheck()
 
       if (isHealthy) {
-        console.log('ðŸ Usando microservicio Python para procesamiento...')
+        console.log('🐍 Usando microservicio Python para procesamiento...')
 
         // Descargar archivo de S3 temporalmente
         const tempFilePath = await this.downloadFromS3(documentUpload.filePath)
@@ -340,15 +340,15 @@ class DocumentExtractionService {
           true // usar OCR avanzado
         )
 
-        console.log(`âœ… Texto extraÃ­do: ${result.text_length} caracteres, confianza: ${result.ocr_confidence}%`)
+        console.log(`✅ Texto extraído: ${result.text_length} caracteres, confianza: ${result.ocr_confidence}%`)
 
         // Limpiar archivo temporal
         await fs.unlink(tempFilePath)
 
         return result.extracted_text
       } else {
-        console.log('âš ï¸ Microservicio no disponible, usando mÃ©todo tradicional')
-        // Fallback al mÃ©todo existente
+        console.log('⚠️ Microservicio no disponible, usando método tradicional')
+        // Fallback al método existente
         return await this.extractTextTraditional(documentUpload)
       }
     } catch (error) {
@@ -370,7 +370,7 @@ PDF_PROCESSOR_URL=http://localhost:8000
 PDF_PROCESSOR_ENABLED=true
 ```
 
-## ðŸ§ª Testing
+## 🧪 Testing
 
 ### Test Manual con curl
 
@@ -406,22 +406,22 @@ with open('estado_cuenta.pdf', 'rb') as f:
     print(response.json())
 ```
 
-## ðŸ” ComparaciÃ³n OCR: Tesseract vs EasyOCR
+## 🔍 Comparación OCR: Tesseract vs EasyOCR
 
-| CaracterÃ­stica | Tesseract (BÃ¡sico) | EasyOCR (Avanzado) |
+| Característica | Tesseract (Básico) | EasyOCR (Avanzado) |
 |----------------|--------------------|--------------------|
-| Velocidad | âš¡ RÃ¡pido (1-2 seg/pÃ¡gina) | ðŸ¢ MÃ¡s lento (3-5 seg/pÃ¡gina) |
-| PrecisiÃ³n | ðŸ“Š 70-85% | ðŸ“Š 85-95% |
-| Idiomas | âœ… EspaÃ±ol + InglÃ©s | âœ… 80+ idiomas |
-| GPU | âŒ No soportado | âœ… AceleraciÃ³n GPU |
-| Uso de Memoria | ðŸ’š Bajo (~100 MB) | ðŸ’› Alto (~500 MB) |
+| Velocidad | ⚡ Rápido (1-2 seg/página) | 🐢 Más lento (3-5 seg/página) |
+| Precisión | 📊 70-85% | 📊 85-95% |
+| Idiomas | ✅ Español + Inglés | ✅ 80+ idiomas |
+| GPU | ❌ No soportado | ✅ Aceleración GPU |
+| Uso de Memoria | 💚 Bajo (~100 MB) | 💛 Alto (~500 MB) |
 | Mejor para | Documentos limpios | Documentos complejos |
 
-**RecomendaciÃ³n**: Usar EasyOCR para documentos crÃ­ticos (INE, estados de cuenta) y Tesseract para documentos simples.
+**Recomendación**: Usar EasyOCR para documentos críticos (INE, estados de cuenta) y Tesseract para documentos simples.
 
-## âš™ï¸ ConfiguraciÃ³n Avanzada
+## ⚙️ Configuración Avanzada
 
-### Optimizar para ProducciÃ³n
+### Optimizar para Producción
 
 ```python
 # En main.py, configurar workers
@@ -431,7 +431,7 @@ if __name__ == "__main__":
         app,
         host="0.0.0.0",
         port=8000,
-        workers=4,  # MÃºltiples workers
+        workers=4,  # Múltiples workers
         log_level="info"
     )
 ```
@@ -444,7 +444,7 @@ environment:
   - TIMEOUT_SECONDS=180  # 3 minutos para PDFs grandes
 ```
 
-## ðŸ“Š Monitoreo
+## 📊 Monitoreo
 
 ### Logs
 
@@ -456,23 +456,23 @@ docker-compose logs -f pdf-processor
 docker-compose logs pdf-processor | grep ERROR
 ```
 
-### MÃ©tricas
+### Métricas
 
-El servicio loguea informaciÃ³n Ãºtil:
+El servicio loguea información útil:
 
 ```
-ðŸ“„ Procesando PDF: estado_cuenta.pdf, tipo: bank_statement
-ðŸ“ Archivo guardado temporalmente
-ðŸ“ Extrayendo texto nativo...
-ðŸ“Š PDF Info: 3 pÃ¡ginas
-ðŸ–¼ï¸ Convirtiendo PDF a imÃ¡genes...
-âœ… Generadas 3 imÃ¡genes
-ðŸ” Texto nativo insuficiente, aplicando OCR...
-âœ¨ OCR avanzado completado - Confianza: 92.5%
-âœ… Procesamiento completado - 5420 caracteres extraÃ­dos
+📄 Procesando PDF: estado_cuenta.pdf, tipo: bank_statement
+📁 Archivo guardado temporalmente
+📝 Extrayendo texto nativo...
+📊 PDF Info: 3 páginas
+🖼️ Convirtiendo PDF a imágenes...
+✅ Generadas 3 imágenes
+🔍 Texto nativo insuficiente, aplicando OCR...
+✨ OCR avanzado completado - Confianza: 92.5%
+✅ Procesamiento completado - 5420 caracteres extraídos
 ```
 
-## ðŸ› ï¸ Troubleshooting
+## 🛠️ Troubleshooting
 
 ### Error: Tesseract no encontrado
 
@@ -480,7 +480,7 @@ El servicio loguea informaciÃ³n Ãºtil:
 # Ubuntu/Debian
 sudo apt-get install tesseract-ocr tesseract-ocr-spa
 
-# Verificar instalaciÃ³n
+# Verificar instalación
 tesseract --version
 ```
 
@@ -496,17 +496,17 @@ pdftoppm -v
 
 ### Error: Out of Memory con EasyOCR
 
-Reducir resoluciÃ³n de imÃ¡genes en `services/pdf_processor.py`:
+Reducir resolución de imágenes en `services/pdf_processor.py`:
 
 ```python
 self.dpi = 200  # En lugar de 300
 ```
 
-## ðŸš€ Performance
+## 🚀 Performance
 
 ### Tiempos de Procesamiento Estimados
 
-| Tipo | PÃ¡ginas | Tesseract | EasyOCR |
+| Tipo | Páginas | Tesseract | EasyOCR |
 |------|---------|-----------|---------|
 | PDF con texto nativo | 3 | 1 seg | 1 seg |
 | PDF escaneado | 3 | 6 seg | 15 seg |
@@ -514,15 +514,15 @@ self.dpi = 200  # En lugar de 300
 
 ### Optimizaciones
 
-1. **Usar texto nativo cuando sea posible** - El servicio automÃ¡ticamente detecta y usa texto nativo del PDF
-2. **CachÃ© de modelos EasyOCR** - Los modelos se cargan una vez y se reutilizan
-3. **Procesamiento paralelo** - Usar mÃºltiples workers en producciÃ³n
-4. **Reducir DPI para PDFs grandes** - Configurar DPI segÃºn necesidad
+1. **Usar texto nativo cuando sea posible** - El servicio automáticamente detecta y usa texto nativo del PDF
+2. **Caché de modelos EasyOCR** - Los modelos se cargan una vez y se reutilizan
+3. **Procesamiento paralelo** - Usar múltiples workers en producción
+4. **Reducir DPI para PDFs grandes** - Configurar DPI según necesidad
 
-## ðŸ“ Licencia
+## 📝 Licencia
 
-Propiedad de HAVI / SarEmi - Todos los derechos reservados.
+Propiedad de SarEmi - Todos los derechos reservados.
 
-## ðŸ¤ Soporte
+## 🤝 Soporte
 
 Para problemas o dudas, contactar al equipo de desarrollo.

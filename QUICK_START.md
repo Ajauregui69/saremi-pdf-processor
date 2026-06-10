@@ -1,8 +1,8 @@
-﻿# ðŸš€ Quick Start - PDF Processor Service
+# 🚀 Quick Start - PDF Processor Service
 
-GuÃ­a rÃ¡pida para poner en marcha el microservicio de procesamiento de PDFs.
+Guía rápida para poner en marcha el microservicio de procesamiento de PDFs.
 
-## âš¡ Inicio RÃ¡pido (Docker)
+## ⚡ Inicio Rápido (Docker)
 
 ```bash
 # 1. Ir al directorio del microservicio
@@ -11,13 +11,13 @@ cd /home/alonso/projects/livo-backend/pdf-processor-service
 # 2. Construir e iniciar
 docker-compose up -d
 
-# 3. Verificar que estÃ© corriendo
+# 3. Verificar que esté corriendo
 curl http://localhost:8000/health
 ```
 
-âœ… **Listo!** El servicio estÃ¡ corriendo en http://localhost:8000
+✅ **Listo!** El servicio está corriendo en http://localhost:8000
 
-## ðŸ“ Inicio RÃ¡pido (Sin Docker)
+## 📝 Inicio Rápido (Sin Docker)
 
 ### Requisitos
 
@@ -26,12 +26,12 @@ curl http://localhost:8000/health
 sudo apt-get update
 sudo apt-get install -y tesseract-ocr tesseract-ocr-spa tesseract-ocr-eng poppler-utils
 
-# Verificar instalaciÃ³n
+# Verificar instalación
 tesseract --version
 pdftoppm -v
 ```
 
-### InstalaciÃ³n
+### Instalación
 
 ```bash
 # 1. Crear entorno virtual
@@ -49,7 +49,7 @@ pip install -r requirements.txt
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-## ðŸ§ª Probar el Servicio
+## 🧪 Probar el Servicio
 
 ### Test 1: Health Check
 
@@ -90,7 +90,7 @@ curl -X POST http://localhost:8000/process-image \
   -F "use_advanced_ocr=true"
 ```
 
-## ðŸ”— IntegraciÃ³n con Backend
+## 🔗 Integración con Backend
 
 ### 1. Variables de Entorno
 
@@ -119,16 +119,16 @@ node ace serve --hmr
 ### 4. Probar Flujo Completo
 
 ```bash
-# Subir documento a travÃ©s del backend
+# Subir documento a través del backend
 curl -X POST http://localhost:3333/api/ai/documents/upload \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -F "file=@estado_cuenta.pdf" \
   -F "documentType=bank_statement"
 ```
 
-## ðŸ“Š Endpoints Disponibles
+## 📊 Endpoints Disponibles
 
-| Endpoint | MÃ©todo | DescripciÃ³n |
+| Endpoint | Método | Descripción |
 |----------|--------|-------------|
 | `/` | GET | Info del servicio |
 | `/health` | GET | Health check |
@@ -136,7 +136,7 @@ curl -X POST http://localhost:3333/api/ai/documents/upload \
 | `/process-image` | POST | Procesar imagen |
 | `/extract-structured-data` | POST | Extraer datos estructurados |
 
-## ðŸ› Troubleshooting
+## 🐛 Troubleshooting
 
 ### Error: "Tesseract no encontrado"
 
@@ -163,7 +163,7 @@ pdftoppm -v
 ### Error: "Puerto 8000 ya en uso"
 
 ```bash
-# Ver quÃ© proceso usa el puerto
+# Ver qué proceso usa el puerto
 sudo lsof -i :8000
 
 # Matar el proceso
@@ -177,7 +177,7 @@ uvicorn main:app --port 8001
 
 EasyOCR consume bastante memoria. Opciones:
 
-1. **Usar Tesseract bÃ¡sico** (mÃ¡s ligero):
+1. **Usar Tesseract básico** (más ligero):
    ```bash
    curl -X POST http://localhost:8000/process-pdf \
      -F "file=@doc.pdf" \
@@ -209,7 +209,7 @@ docker-compose logs -f pdf-processor
 # Los logs aparecen en la terminal donde ejecutaste uvicorn
 ```
 
-## ðŸŽ¯ Verificar que Todo Funciona
+## 🎯 Verificar que Todo Funciona
 
 ### Checklist
 
@@ -220,20 +220,20 @@ docker-compose logs -f pdf-processor
 - [ ] Logs muestran actividad del procesamiento
 - [ ] Documentos se procesan sin errores
 
-### Script de VerificaciÃ³n Completa
+### Script de Verificación Completa
 
 ```bash
 #!/bin/bash
 
-echo "ðŸ” Verificando microservicio PDF Processor..."
+echo "🔍 Verificando microservicio PDF Processor..."
 
 # 1. Health check
 echo -n "1. Health check... "
 HEALTH=$(curl -s http://localhost:8000/health | grep -o "healthy")
 if [ "$HEALTH" == "healthy" ]; then
-  echo "âœ…"
+  echo "✅"
 else
-  echo "âŒ Servicio no disponible"
+  echo "❌ Servicio no disponible"
   exit 1
 fi
 
@@ -241,17 +241,17 @@ fi
 echo -n "2. Root endpoint... "
 VERSION=$(curl -s http://localhost:8000 | grep -o "1.0.0")
 if [ "$VERSION" == "1.0.0" ]; then
-  echo "âœ…"
+  echo "✅"
 else
-  echo "âŒ"
+  echo "❌"
   exit 1
 fi
 
 echo ""
-echo "âœ… Todos los checks pasaron!"
-echo "ðŸŽ‰ Microservicio funcionando correctamente"
+echo "✅ Todos los checks pasaron!"
+echo "🎉 Microservicio funcionando correctamente"
 echo ""
-echo "ðŸ“ Siguiente paso: Probar con un PDF real"
+echo "📝 Siguiente paso: Probar con un PDF real"
 echo "   python test_service.py /path/to/your/document.pdf"
 ```
 
@@ -262,23 +262,23 @@ chmod +x verify.sh
 ./verify.sh
 ```
 
-## ðŸ“š DocumentaciÃ³n Adicional
+## 📚 Documentación Adicional
 
 - **README completo**: `README.md`
-- **GuÃ­a de integraciÃ³n**: `/home/alonso/projects/livo-backend/INTEGRACION_PDF_PROCESSOR.md`
-- **DocumentaciÃ³n API**: http://localhost:8000/docs (FastAPI auto-docs)
+- **Guía de integración**: `/home/alonso/projects/livo-backend/INTEGRACION_PDF_PROCESSOR.md`
+- **Documentación API**: http://localhost:8000/docs (FastAPI auto-docs)
 
-## ðŸŽ“ PrÃ³ximos Pasos
+## 🎓 Próximos Pasos
 
-1. âœ… Servicio funcionando
-2. âœ… IntegraciÃ³n con backend
-3. ðŸ“ Probar con documentos reales
-4. ðŸ”§ Ajustar parÃ¡metros si es necesario
-5. ðŸš€ Desplegar a producciÃ³n
+1. ✅ Servicio funcionando
+2. ✅ Integración con backend
+3. 📝 Probar con documentos reales
+4. 🔧 Ajustar parámetros si es necesario
+5. 🚀 Desplegar a producción
 
 ---
 
-**Â¿Problemas?** Revisar logs:
+**¿Problemas?** Revisar logs:
 ```bash
 # Docker
 docker-compose logs -f pdf-processor
