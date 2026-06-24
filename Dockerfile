@@ -21,10 +21,16 @@ COPY requirements.txt .
 
 RUN sed -i 's/opencv-python==/opencv-python-headless==/g' requirements.txt
 
-# Cache de pip persiste entre builds — torch (190 MB) no se vuelve a bajar si ya está en cache
+# Cache de pip persiste entre builds — torch (190 MB) no se vuelve a bajar si ya está en cache.
+# Multi-arch: los wheels +cpu solo existen para x86_64 (amd64). En aarch64 (Macs M-series)
+# torchvision==0.21.0+cpu no resuelve y el build aborta, así que ahí usamos los wheels normales.
+ARG TARGETARCH
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install torch==2.6.0+cpu torchvision==0.21.0+cpu \
-    --index-url https://download.pytorch.org/whl/cpu
+    if [ "$TARGETARCH" = "amd64" ]; then \
+      pip install torch==2.6.0+cpu torchvision==0.21.0+cpu --index-url https://download.pytorch.org/whl/cpu; \
+    else \
+      pip install torch==2.6.0 torchvision==0.21.0; \
+    fi
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -r requirements.txt
@@ -44,4 +50,6 @@ ENV PYTHONUNBUFFERED=1
 
 EXPOSE 8000
 
-ENTRYPOINT ["/app/entrypoint.sh"]
+# Invocamos bash explícito: el bit de ejecución del entrypoint no siempre sobrevive
+# al COPY/build (depende del filesystem de origen), lo que causaba "permission denied".
+ENTRYPOINT ["bash", "/app/entrypoint.sh"]
