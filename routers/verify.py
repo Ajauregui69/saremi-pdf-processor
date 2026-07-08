@@ -216,8 +216,13 @@ async def _save_log(
     """Guarda el resultado en verification_logs. Si se pasa pending_id, actualiza ese registro."""
     # Registrar en blockchain (independiente de la persistencia en PostgreSQL):
     # un fallo de DB no impide el registro en cadena, y viceversa. Aplica a TODOS
-    # los tipos de documento porque todos los endpoints llaman a _save_log.
-    await _register_on_blockchain(result, doc_hash)
+    # los tipos de documento porque todos los endpoints llaman a _save_log —
+    # salvo que la institución tenga blockchain_enabled=false en su config.
+    from auth.entitlements import get_request_config
+    if get_request_config(request).get("blockchain_enabled", True):
+        await _register_on_blockchain(result, doc_hash)
+    else:
+        logger.info("Registro en blockchain omitido por configuración de la institución")
 
     def _strip_nul(s: str) -> str:
         """Elimina bytes NUL que PostgreSQL no acepta en strings."""
@@ -906,6 +911,14 @@ async def verify_document_auto(
             if doc_type == "unknown" and suffix in (".jpg", ".jpeg", ".png", ".webp", ".pdf"):
                 doc_type = _classify_with_vision(tmp_path) or "unknown"
             logger.info(f"Tipo detectado (keywords+vision): {doc_type}")
+
+        # Entitlements: el tipo resuelto (hint o detectado) debe estar habilitado
+        from auth.entitlements import get_request_config, doc_type_allowed
+        if not doc_type_allowed(get_request_config(request), doc_type):
+            raise HTTPException(
+                status_code=403,
+                detail=f"El tipo de documento detectado ('{doc_type}') no está habilitado para su institución.",
+            )
 
         if doc_type == "ine":
             from services.data_extractor import extract_id_document_data as _eid

@@ -10,9 +10,15 @@ CREATE TABLE IF NOT EXISTS institutions (
     plan            TEXT NOT NULL DEFAULT 'basic',
     active          BOOLEAN NOT NULL DEFAULT true,
     baas_entity_id  TEXT,
+    -- Entitlements del token: protocolos permitidos, blockchain on/off, tipos de documento
+    config          JSONB NOT NULL DEFAULT '{"allowed_protocols": ["rest", "soap"], "blockchain_enabled": true, "allowed_document_types": ["*"]}',
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Migración para DBs existentes (idempotente)
+ALTER TABLE institutions ADD COLUMN IF NOT EXISTS config JSONB NOT NULL
+    DEFAULT '{"allowed_protocols": ["rest", "soap"], "blockchain_enabled": true, "allowed_document_types": ["*"]}';
 
 CREATE TABLE IF NOT EXISTS api_keys (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),

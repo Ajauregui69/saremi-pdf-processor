@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from database import init_db, close_db
-from routers import verify, process, admin
+from routers import verify, process, admin, soap
 
 logging.basicConfig(
     level=os.getenv("LOG_LEVEL", "INFO"),
@@ -60,6 +60,7 @@ app.add_middleware(
 app.include_router(verify.router)
 app.include_router(process.router)
 app.include_router(admin.router)
+app.include_router(soap.router)
 
 
 @app.get("/", tags=["health"])

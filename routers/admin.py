@@ -86,6 +86,13 @@ class ApiKeyCreate(BaseModel):
     expires_at: Optional[datetime] = None
 
 
+class InstitutionConfigUpdate(BaseModel):
+    """Entitlements del token. Solo los campos enviados se actualizan (merge)."""
+    allowed_protocols: Optional[list[str]] = None       # ["rest", "soap"]
+    blockchain_enabled: Optional[bool] = None
+    allowed_document_types: Optional[list[str]] = None  # ["*"] o tipos específicos
+
+
 class ReviewDecision(BaseModel):
     decision: str
     notes: Optional[str] = None
@@ -190,6 +197,80 @@ async def update_institution(
         if not row:
             raise HTTPException(status_code=404, detail="Institución no encontrada")
         return dict(row)
+
+
+def _valid_config_doc_types() -> set[str]:
+    from routers.soap import _allowed_types
+    return (_allowed_types() - {"auto"}) | {"employment_letter", "tax_return", "*"}
+
+
+@router.get("/institutions/{institution_id}/config")
+async def get_institution_config(
+    institution_id: UUID,
+    user: dict = Depends(get_admin_user),
+):
+    from auth.entitlements import normalize_config
+    async with get_conn() as conn:
+        row = await conn.fetchrow(
+            "SELECT config FROM institutions WHERE id = %s", str(institution_id)
+        )
+        if not row:
+            raise HTTPException(status_code=404, detail="Institución no encontrada")
+        raw = row["config"]
+        if isinstance(raw, str):
+            raw = json.loads(raw)
+        return normalize_config(raw)
+
+
+@router.put("/institutions/{institution_id}/config")
+async def update_institution_config(
+    institution_id: UUID,
+    body: InstitutionConfigUpdate,
+    user: dict = Depends(get_admin_user),
+):
+    from auth.entitlements import VALID_PROTOCOLS, normalize_config
+
+    updates = body.model_dump(exclude_none=True)
+    if not updates:
+        raise HTTPException(status_code=400, detail="No hay campos para actualizar")
+
+    if "allowed_protocols" in updates:
+        protocols = {str(p).lower() for p in updates["allowed_protocols"]}
+        invalid = protocols - VALID_PROTOCOLS
+        if invalid:
+            raise HTTPException(status_code=400, detail=f"Protocolos inválidos: {', '.join(invalid)}. Válidos: rest, soap")
+        if not protocols:
+            raise HTTPException(status_code=400, detail="allowed_protocols no puede quedar vacío")
+        updates["allowed_protocols"] = sorted(protocols)
+
+    if "allowed_document_types" in updates:
+        types = [str(t).lower() for t in updates["allowed_document_types"]]
+        invalid = set(types) - _valid_config_doc_types()
+        if invalid:
+            raise HTTPException(status_code=400, detail=f"Tipos de documento inválidos: {', '.join(sorted(invalid))}")
+        if not types:
+            raise HTTPException(status_code=400, detail="allowed_document_types no puede quedar vacío (use [\"*\"] para todos)")
+        updates["allowed_document_types"] = types
+
+    async with get_conn() as conn:
+        row = await conn.fetchrow(
+            "SELECT config FROM institutions WHERE id = %s", str(institution_id)
+        )
+        if not row:
+            raise HTTPException(status_code=404, detail="Institución no encontrada")
+
+        current = row["config"]
+        if isinstance(current, str):
+            current = json.loads(current)
+        merged = normalize_config(current)
+        merged.update(updates)
+
+        await conn.execute(
+            "UPDATE institutions SET config = %s::jsonb, updated_at = NOW() WHERE id = %s",
+            json.dumps(merged), str(institution_id),
+        )
+        logger.info(f"Config de institución {institution_id} actualizada por {user.get('email')}: {merged}")
+        return merged
 
 
 @router.delete("/institutions/{institution_id}", status_code=204)
