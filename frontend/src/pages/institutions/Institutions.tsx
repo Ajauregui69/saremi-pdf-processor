@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getInstitutions, createInstitution, getApiKeys, createApiKey, revokeApiKey } from '../../api/admin'
-import { Plus, Key, Copy, Check, X, Building2 } from 'lucide-react'
+import { getInstitutions, createInstitution, getApiKeys, createApiKey, revokeApiKey, getInstitutionConfig, updateInstitutionConfig } from '../../api/admin'
+import { Plus, Key, Copy, Check, X, Building2, Settings2 } from 'lucide-react'
 import { formatDate } from '../../lib/utils'
 
 function Badge({ active }: { active: boolean }) {
@@ -146,6 +146,175 @@ function ApiKeysModal({ institution, onClose }: { institution: any; onClose: () 
   )
 }
 
+const DOC_TYPES: { value: string; label: string }[] = [
+  { value: 'ine', label: 'INE / Credencial para votar' },
+  { value: 'curp', label: 'CURP' },
+  { value: 'rfc', label: 'RFC' },
+  { value: 'csf', label: 'Constancia de Situación Fiscal' },
+  { value: 'cfdi', label: 'CFDI / Factura' },
+  { value: 'bank_statement', label: 'Estado de cuenta' },
+  { value: 'proof_of_address', label: 'Comprobante de domicilio' },
+  { value: 'payroll', label: 'Recibo de nómina' },
+  { value: 'income_proof', label: 'Comprobante de ingresos' },
+  { value: 'spei', label: 'Comprobante SPEI' },
+  { value: 'escritura', label: 'Escritura pública' },
+  { value: 'predial', label: 'Boleta predial' },
+  { value: 'passport', label: 'Pasaporte' },
+  { value: 'acta_nacimiento', label: 'Acta de nacimiento' },
+  { value: 'acta_matrimonio', label: 'Acta de matrimonio' },
+  { value: 'acta_defuncion', label: 'Acta de defunción' },
+  { value: 'cert_libertad_gravamen', label: 'Cert. libertad de gravamen' },
+  { value: 'avaluo', label: 'Avalúo inmobiliario' },
+  { value: 'carta_no_adeudo', label: 'Carta de no adeudo' },
+  { value: 'licencia', label: 'Licencia de conducir' },
+  { value: 'fm_residencia', label: 'Tarjeta de residencia / FM' },
+  { value: 'cedula_profesional', label: 'Cédula profesional' },
+]
+
+function ConfigModal({ institution, onClose }: { institution: any; onClose: () => void }) {
+  const qc = useQueryClient()
+  const [protocols, setProtocols] = useState<string[]>(['rest', 'soap'])
+  const [blockchain, setBlockchain] = useState(true)
+  const [allTypes, setAllTypes] = useState(true)
+  const [types, setTypes] = useState<string[]>([])
+
+  const { data: config, isLoading } = useQuery({
+    queryKey: ['institution-config', institution.id],
+    queryFn: () => getInstitutionConfig(institution.id),
+  })
+
+  useEffect(() => {
+    if (!config) return
+    setProtocols(config.allowed_protocols)
+    setBlockchain(config.blockchain_enabled)
+    const isAll = config.allowed_document_types.includes('*')
+    setAllTypes(isAll)
+    setTypes(isAll ? [] : config.allowed_document_types)
+  }, [config])
+
+  const saveMut = useMutation({
+    mutationFn: () =>
+      updateInstitutionConfig(institution.id, {
+        allowed_protocols: protocols,
+        blockchain_enabled: blockchain,
+        allowed_document_types: allTypes ? ['*'] : types,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['institution-config', institution.id] })
+      onClose()
+    },
+  })
+
+  const toggleProtocol = (p: string) =>
+    setProtocols((prev) => (prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]))
+
+  const toggleType = (t: string) =>
+    setTypes((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]))
+
+  const canSave = protocols.length > 0 && (allTypes || types.length > 0)
+
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+      <div className="bg-slate-900 rounded-2xl border border-slate-800 w-full max-w-lg shadow-2xl max-h-[90vh] flex flex-col">
+        <div className="flex items-center justify-between p-5 border-b border-slate-800">
+          <div>
+            <h3 className="text-white font-semibold">Configuración del token</h3>
+            <p className="text-slate-500 text-xs mt-0.5">{institution.name}</p>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-white p-1.5 rounded-lg transition-colors cursor-pointer"><X className="w-4 h-4" /></button>
+        </div>
+
+        {isLoading ? (
+          <div className="p-5 space-y-3 animate-pulse">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-10 bg-slate-800 rounded-xl" />
+            ))}
+          </div>
+        ) : (
+          <div className="p-5 space-y-5 overflow-y-auto">
+            <div>
+              <p className="text-slate-300 text-xs font-medium mb-2">Protocolos permitidos</p>
+              <div className="flex gap-2">
+                {[{ v: 'rest', l: 'REST (JSON)' }, { v: 'soap', l: 'SOAP (XML)' }].map(({ v, l }) => (
+                  <button
+                    key={v}
+                    onClick={() => toggleProtocol(v)}
+                    className={`px-3.5 py-2 rounded-xl text-sm border transition-colors cursor-pointer ${
+                      protocols.includes(v)
+                        ? 'bg-blue-600/20 border-blue-500/40 text-blue-300'
+                        : 'bg-slate-800 border-slate-700 text-slate-500'
+                    }`}
+                  >
+                    {l}
+                  </button>
+                ))}
+              </div>
+              {protocols.length === 0 && <p className="text-red-400 text-xs mt-1.5">Debe permitir al menos un protocolo</p>}
+            </div>
+
+            <div className="flex items-center justify-between bg-slate-800/60 rounded-xl px-4 py-3 border border-slate-700/50">
+              <div>
+                <p className="text-white text-sm">Registro en blockchain</p>
+                <p className="text-slate-500 text-xs mt-0.5">Anclar hash y veredicto de cada verificación en Hyperledger Fabric</p>
+              </div>
+              <button
+                onClick={() => setBlockchain(!blockchain)}
+                className={`w-11 h-6 rounded-full transition-colors cursor-pointer relative shrink-0 ${blockchain ? 'bg-blue-600' : 'bg-slate-700'}`}
+              >
+                <span
+                  className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform"
+                  style={{ transform: blockchain ? 'translateX(20px)' : 'translateX(0)' }}
+                />
+              </button>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-slate-300 text-xs font-medium">Tipos de documento</p>
+                <label className="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer">
+                  <input type="checkbox" checked={allTypes} onChange={(e) => setAllTypes(e.target.checked)} className="accent-blue-600" />
+                  Todos
+                </label>
+              </div>
+              {!allTypes && (
+                <div className="grid grid-cols-2 gap-1.5 max-h-56 overflow-y-auto pr-1">
+                  {DOC_TYPES.map(({ value, label }) => (
+                    <label
+                      key={value}
+                      className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs cursor-pointer border transition-colors ${
+                        types.includes(value)
+                          ? 'bg-blue-600/15 border-blue-500/30 text-blue-200'
+                          : 'bg-slate-800/60 border-slate-700/50 text-slate-400'
+                      }`}
+                    >
+                      <input type="checkbox" checked={types.includes(value)} onChange={() => toggleType(value)} className="accent-blue-600" />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              )}
+              {!allTypes && types.length === 0 && <p className="text-red-400 text-xs mt-1.5">Seleccione al menos un tipo o marque "Todos"</p>}
+            </div>
+          </div>
+        )}
+
+        <div className="p-5 border-t border-slate-800">
+          <button
+            onClick={() => saveMut.mutate()}
+            disabled={saveMut.isPending || isLoading || !canSave}
+            className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white py-2.5 rounded-xl text-sm font-medium transition-colors cursor-pointer"
+          >
+            {saveMut.isPending ? 'Guardando...' : 'Guardar configuración'}
+          </button>
+          {saveMut.isError && (
+            <p className="text-red-400 text-xs mt-2">{(saveMut.error as any)?.response?.data?.detail || 'Error al guardar'}</p>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function NewInstitutionModal({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient()
   const [form, setForm] = useState({ name: '', email: '', contact_name: '', phone: '', plan: 'basic' })
@@ -211,6 +380,7 @@ function NewInstitutionModal({ onClose }: { onClose: () => void }) {
 export default function Institutions() {
   const [showNew, setShowNew] = useState(false)
   const [keysFor, setKeysFor] = useState<any | null>(null)
+  const [configFor, setConfigFor] = useState<any | null>(null)
 
   const { data, isLoading } = useQuery({
     queryKey: ['institutions'],
@@ -273,13 +443,22 @@ export default function Institutions() {
                   <td className="px-4 py-3"><Badge active={inst.active} /></td>
                   <td className="px-4 py-3 text-slate-500 text-xs">{formatDate(inst.created_at)}</td>
                   <td className="px-4 py-3">
-                    <button
-                      onClick={() => setKeysFor(inst)}
-                      className="text-slate-500 hover:text-blue-400 transition-colors p-1 rounded cursor-pointer opacity-0 group-hover:opacity-100"
-                      title="Gestionar API Keys"
-                    >
-                      <Key className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setKeysFor(inst)}
+                        className="text-slate-400 hover:text-blue-400 hover:bg-slate-700/60 transition-colors p-1.5 rounded-lg cursor-pointer"
+                        title="Gestionar API Keys"
+                      >
+                        <Key className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setConfigFor(inst)}
+                        className="text-slate-400 hover:text-blue-400 hover:bg-slate-700/60 transition-colors p-1.5 rounded-lg cursor-pointer"
+                        title="Configuración del token (protocolos, blockchain, documentos)"
+                      >
+                        <Settings2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -300,6 +479,7 @@ export default function Institutions() {
 
       {showNew && <NewInstitutionModal onClose={() => setShowNew(false)} />}
       {keysFor && <ApiKeysModal institution={keysFor} onClose={() => setKeysFor(null)} />}
+      {configFor && <ConfigModal institution={configFor} onClose={() => setConfigFor(null)} />}
     </div>
   )
 }

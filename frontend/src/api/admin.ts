@@ -25,6 +25,19 @@ export const updateInstitution = (id: string, data: Record<string, unknown>) =>
 export const deleteInstitution = (id: string) =>
   api.delete(`/admin/institutions/${id}`)
 
+// ── Institution Config (entitlements) ─────────────────────────────────────────
+export interface InstitutionConfig {
+  allowed_protocols: string[]
+  blockchain_enabled: boolean
+  allowed_document_types: string[]
+}
+
+export const getInstitutionConfig = (id: string): Promise<InstitutionConfig> =>
+  api.get(`/admin/institutions/${id}/config`).then((r) => r.data)
+
+export const updateInstitutionConfig = (id: string, data: Partial<InstitutionConfig>) =>
+  api.put(`/admin/institutions/${id}/config`, data).then((r) => r.data)
+
 // ── API Keys ──────────────────────────────────────────────────────────────────
 export const getApiKeys = (institutionId: string) =>
   api.get(`/admin/institutions/${institutionId}/api-keys`).then((r) => r.data)
