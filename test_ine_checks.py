@@ -114,6 +114,8 @@ flag_codes = {f.code for f in flags}
 
 check(f"veredicto = INVALID (antes salía VERIFIED; confianza {conf:.2f})",
       status == VerificationStatus.INVALID)
+check(f"confianza desplomada con check crítico fallido ({conf:.2f} ≤ 0.15, antes salía 0.91)",
+      conf <= 0.15)
 check("bandera CURP_MALFORMED presente", "CURP_MALFORMED" in flag_codes)
 check("bandera MRZ_CHECK_DIGITS_INVALID presente", "MRZ_CHECK_DIGITS_INVALID" in flag_codes)
 

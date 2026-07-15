@@ -93,7 +93,19 @@ def compute_confidence(checks: List[CheckItem]) -> float:
     max_possible = len(scored) * 1.0
     actual = sum(_WEIGHTS[c.status] for c in scored)
     score = (actual + max_possible) / (2 * max_possible)
-    return max(0.0, min(1.0, score))
+    score = max(0.0, min(1.0, score))
+
+    # Un check crítico fallido invalida el documento sin importar el promedio:
+    # la confianza reportada debe reflejar el veredicto. Sin este tope, un
+    # documento fraudulento salía "INVALID con confianza 0.91" porque los demás
+    # checks (visuales, formato) sí pasaban.
+    failed_critical = any(
+        c.status == CheckStatus.FAILED and c.name in _CRITICAL_CHECKS
+        for c in checks
+    )
+    if failed_critical:
+        return min(score, 0.15)
+    return score
 
 
 def determine_status(confidence: float, checks: List[CheckItem]) -> VerificationStatus:
