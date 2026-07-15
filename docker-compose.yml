@@ -9,6 +9,11 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - LOG_LEVEL=INFO
+      # Hot reload: el código está montado como volumen; sin esto, un git pull
+      # no se aplica hasta reiniciar el contenedor.
+      - RELOAD=true
+      # El watcher nativo falla sobre bind-mounts de Docker Desktop (Windows/Mac)
+      - WATCHFILES_FORCE_POLLING=true
     volumes:
       # Montar código en desarrollo (comentar en producción)
       - .:/app
