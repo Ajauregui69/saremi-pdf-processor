@@ -19,8 +19,14 @@ _WEIGHTS = {
 }
 
 # Checks que, si fallan, fuerzan el estado a INVALID sin importar el score.
+# Los checks deterministas (dígitos verificadores, estructura) solo emiten FAILED
+# cuando la evidencia es matemática, así que su fallo es veto directo.
 _CRITICAL_CHECKS = {
     "vigencia",
+    # INE: validaciones deterministas (ICAO 9303 / RENAPO)
+    "mrz_integridad",
+    "formato_curp",
+    "curp_consistencia",
     "cfdi_timbrado",
     "fraude_manipulacion_digital",
     "fraude_integridad_visual",
@@ -49,6 +55,10 @@ _FRAUD_FLAG_MAP: Dict[str, tuple] = {
     "fraude_sellos_y_firmas":         ("SEALS_SIGNATURES_ALTERED", FraudFlagSeverity.HIGH,     "Sellos o firmas con indicios de inserción o modificación digital"),
     "fraude_sello_oficial":           ("OFFICIAL_SEAL_ALTERED",    FraudFlagSeverity.HIGH,     "Sello oficial gubernamental con indicios de alteración"),
     "fraude_ia_generativa":           ("AI_GENERATED_DOCUMENT",    FraudFlagSeverity.CRITICAL, "Documento posiblemente generado por inteligencia artificial"),
+    # INE: validaciones deterministas
+    "mrz_integridad":                 ("MRZ_CHECK_DIGITS_INVALID", FraudFlagSeverity.CRITICAL, "Dígitos verificadores de la MRZ inválidos (ICAO 9303) — zona de lectura mecánica fabricada o manipulada"),
+    "formato_curp":                   ("CURP_MALFORMED",           FraudFlagSeverity.CRITICAL, "CURP estructuralmente imposible — un CURP real siempre tiene 18 caracteres con estructura fija"),
+    "curp_consistencia":              ("CURP_INCONSISTENT",        FraudFlagSeverity.CRITICAL, "CURP inconsistente con los datos del propio documento (dígito verificador, fecha, sexo o entidad)"),
     # QR
     "qr_verificacion_ine":            ("QR_INE_INVALID",           FraudFlagSeverity.CRITICAL, "QR de INE marcado como inválido por el portal oficial del INE"),
     "qr_validez_ine":                 ("QR_INE_PORTAL_REJECTED",   FraudFlagSeverity.CRITICAL, "El portal del INE indica que la credencial no es válida"),
@@ -189,6 +199,10 @@ def generate_conclusion(
         base = f"El {doc_label} presentado para {name} ha sido VERIFICADO exitosamente."
         if passed:
             base += f" Se superaron {len(passed)} verificación(es)."
+        # Transparencia: nunca ocultar checks fallidos aunque el veredicto sea VERIFIED.
+        if failed:
+            reasons = "; ".join(c.detail for c in failed[:3])
+            base += f" ATENCIÓN: {len(failed)} verificación(es) fallida(s) que requieren revisión: {reasons}"
     elif status == VerificationStatus.INVALID:
         if fraud_flags:
             critical = [f for f in fraud_flags if f.severity == FraudFlagSeverity.CRITICAL]

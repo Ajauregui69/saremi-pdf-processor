@@ -173,13 +173,18 @@ def _validate_ine_fields(raw: dict) -> dict:
             if len(v_clean) == 18:
                 out[k] = v_clean
             else:
-                logger.warning(f"CURP descartado (len={len(v_clean)}): '{v_clean}'")
+                # No descartar en silencio: un CURP con longitud imposible leído por
+                # visión (no OCR ruidoso) es evidencia de falsificación, no de mala captura.
+                # El verificador lo evalúa vía curp_invalid_raw.
+                out["curp_invalid_raw"] = v_clean
+                logger.warning(f"CURP con longitud inválida (len={len(v_clean)}): '{v_clean}' — se pasa al verificador como curp_invalid_raw")
         elif k == "voter_id":
             v_clean = v.strip().upper().replace(" ", "")
             if len(v_clean) == 18:
                 out[k] = v_clean
             else:
-                logger.warning(f"Clave de elector descartada (len={len(v_clean)}): '{v_clean}'")
+                out["voter_id_invalid_raw"] = v_clean
+                logger.warning(f"Clave de elector con longitud inválida (len={len(v_clean)}): '{v_clean}' — se pasa al verificador como voter_id_invalid_raw")
         elif k == "mrz_line1":
             v_clean = v.strip().upper()
             if len(v_clean) == 30 and v_clean.startswith("ID"):

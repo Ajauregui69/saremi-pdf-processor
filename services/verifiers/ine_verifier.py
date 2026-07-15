@@ -36,6 +36,31 @@ _ENTIDADES_CURP = {
     "YN", "ZS", "NE",
 }
 
+# Alfabeto oficial para el dígito verificador del CURP (posición 18)
+_CURP_CHARSET = "0123456789ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"
+
+# Entidad numérica de la clave de elector (pos. 13-14) → entidad del CURP (pos. 12-13)
+_INE_ENTIDAD_TO_CURP = {
+    "01": "AS", "02": "BC", "03": "BS", "04": "CC", "05": "CL",
+    "06": "CM", "07": "CS", "08": "CH", "09": "DF", "10": "DG",
+    "11": "GT", "12": "GR", "13": "HG", "14": "JC", "15": "MC",
+    "16": "MN", "17": "MS", "18": "NT", "19": "NL", "20": "OC",
+    "21": "PL", "22": "QT", "23": "QR", "24": "SP", "25": "SL",
+    "26": "SR", "27": "TC", "28": "TS", "29": "TL", "30": "VZ",
+    "31": "YN", "32": "ZS",
+}
+
+
+def _curp_check_digit(curp17: str) -> Optional[int]:
+    """Dígito verificador oficial del CURP (algoritmo RENAPO, pesos 18..2 mod 10)."""
+    total = 0
+    for i, ch in enumerate(curp17):
+        idx = _CURP_CHARSET.find(ch)
+        if idx < 0:
+            return None
+        total += idx * (18 - i)
+    return (10 - total % 10) % 10
+
 
 class INEVerifier(BaseVerifier):
     """Verifica autenticidad de una INE/Credencial para Votar."""
@@ -56,8 +81,11 @@ class INEVerifier(BaseVerifier):
         # 1. Formato de clave de elector
         checks.append(self._check_voter_id_format(voter_id))
 
-        # 2. Formato de CURP
-        checks.append(self._check_curp_format(curp))
+        # 2. Formato de CURP (incluye CURP malformado detectado por visión)
+        checks.append(self._check_curp_format(curp, extracted_data.get("curp_invalid_raw", "")))
+
+        # 2b. Consistencia interna del CURP: dígito verificador, fecha, sexo y entidad
+        checks.append(self._check_curp_consistency(extracted_data))
 
         # 3. Cross-check CURP ↔ nombre (primeras letras)
         if curp and full_name:
@@ -106,9 +134,10 @@ class INEVerifier(BaseVerifier):
             return self._skipped("mrz_integridad", "Zona MRZ no detectada en el documento (se requiere el reverso)")
 
         results = []
-        all_ok = True
+        n_failed = 0
 
         checks_map = [
+            ("doc_check_ok",       "Nro. documento", f"Fuente: MRZ línea 1, posiciones 6-15 ({mrz.get('doc_number', '?')})"),
             ("dob_check_ok",       "DOB",        f"Fuente: MRZ línea 2, posiciones 1-7 (fecha {mrz.get('dob_raw', '?')})"),
             ("expiry_check_ok",    "Vencimiento", f"Fuente: MRZ línea 2, posiciones 9-15 ({mrz.get('expiry_raw', '?')})"),
             ("composite_check_ok", "Compuesto",  "Fuente: MRZ línea 2, posición 30 (valida toda la MRZ)"),
@@ -121,15 +150,24 @@ class INEVerifier(BaseVerifier):
                 results.append(f"{label}: ✓")
             else:
                 results.append(f"{label}: ✗ INVÁLIDO — {source}")
-                all_ok = False
+                n_failed += 1
 
         detail = " | ".join(results)
-        if all_ok:
+        if n_failed == 0:
             return self._passed("mrz_integridad", f"Todos los dígitos verificadores MRZ son correctos. {detail}")
+
+        if n_failed == 1:
+            # Un solo dígito mal puede ser un carácter mal transcrito de la MRZ;
+            # dos o más ya no se explican por error de lectura.
+            return self._warning(
+                "mrz_integridad",
+                f"Un dígito verificador MRZ no cuadra — puede ser error de transcripción, revisar manualmente. {detail}",
+            )
 
         return self._failed(
             "mrz_integridad",
-            f"Dígito(s) verificador(es) MRZ inválidos — posible manipulación del reverso. {detail}",
+            f"{n_failed} dígitos verificadores MRZ inválidos (ICAO 9303) — los dígitos de una "
+            f"credencial emitida por el INE siempre cuadran; esto indica una MRZ fabricada. {detail}",
         )
 
     def _check_dob_consistency(self, extracted_data: Dict) -> CheckItem:
@@ -234,7 +272,17 @@ class INEVerifier(BaseVerifier):
         # Un formato inválido no confirma falsificación — puede ser error de captura.
         return self._warning("formato_clave_elector", f"Clave de elector no pudo leerse con claridad (posible error OCR en escaneo): {voter_id!r}")
 
-    def _check_curp_format(self, curp: str) -> CheckItem:
+    def _check_curp_format(self, curp: str, curp_invalid_raw: str = "") -> CheckItem:
+        if not curp and curp_invalid_raw:
+            # Claude Vision transcribió el CURP con claridad y NO mide 18 caracteres.
+            # Eso no es ruido de OCR: un CURP real siempre tiene 18. Indicador directo
+            # de falsificación (check crítico en conclusion_engine).
+            return self._failed(
+                "formato_curp",
+                f"CURP estructuralmente imposible: {curp_invalid_raw!r} tiene "
+                f"{len(curp_invalid_raw)} caracteres y un CURP real siempre tiene 18. "
+                f"Leído por visión con claridad — indicador de documento fabricado.",
+            )
         if not curp:
             return self._skipped("formato_curp", "No se pudo extraer el CURP (OCR insuficiente o imagen borrosa)")
         clean = curp.replace(" ", "").upper()
@@ -247,6 +295,89 @@ class INEVerifier(BaseVerifier):
         if entidad not in _ENTIDADES_CURP:
             return self._warning("formato_curp", f"Entidad federativa desconocida en CURP: {entidad}")
         return self._passed("formato_curp", f"CURP con formato válido: {clean}")
+
+    def _check_curp_consistency(self, extracted_data: Dict) -> CheckItem:
+        """
+        Valida que el CURP sea internamente consistente con el resto del documento:
+        dígito verificador (RENAPO), fecha de nacimiento, sexo y entidad federativa.
+        Todos son deterministas: en una INE genuina siempre cuadran.
+        """
+        curp = (extracted_data.get("curp") or "").replace(" ", "").upper()
+        if len(curp) != 18:
+            return self._skipped("curp_consistencia", "CURP de 18 caracteres no disponible para validar consistencia")
+
+        mismatches: list = []
+        warns: list = []
+        oks: list = []
+
+        # 1. Dígito verificador (posición 18)
+        dv = _curp_check_digit(curp[:17])
+        if dv is not None:
+            if curp[17].isdigit() and int(curp[17]) == dv:
+                oks.append("dígito verificador ✓")
+            else:
+                mismatches.append(f"dígito verificador: esperado {dv}, impreso {curp[17]!r}")
+
+        # 2. Fecha de nacimiento (CURP pos. 5-10, AAMMDD) vs campo del frente
+        birth = (extracted_data.get("birth_date") or "").strip()
+        m = re.match(r'(\d{1,2})[/\-](\d{1,2})[/\-](\d{4})', birth)
+        if m:
+            expected_date = f"{m.group(3)[2:]}{int(m.group(2)):02d}{int(m.group(1)):02d}"
+            if curp[4:10] == expected_date:
+                oks.append("fecha de nacimiento ✓")
+            else:
+                mismatches.append(f"fecha: CURP dice {curp[4:10]}, el frente implica {expected_date} (AAMMDD)")
+
+        # 3. Sexo (CURP pos. 11) vs campo SEXO del frente
+        sex = (extracted_data.get("sex") or "").strip().upper()
+        if sex in ("H", "M"):
+            if curp[10] == sex:
+                oks.append("sexo ✓")
+            else:
+                mismatches.append(f"sexo: CURP dice {curp[10]!r}, el frente dice {sex!r}")
+
+        # 4. Entidad (CURP pos. 12-13) vs entidad numérica de la clave de elector
+        voter_id = (extracted_data.get("voter_id") or "").strip().upper()
+        if len(voter_id) == 18:
+            entidad_esperada = _INE_ENTIDAD_TO_CURP.get(voter_id[12:14])
+            if entidad_esperada:
+                if curp[11:13] == entidad_esperada:
+                    oks.append("entidad federativa ✓")
+                else:
+                    mismatches.append(f"entidad: CURP dice {curp[11:13]}, la clave de elector implica {entidad_esperada}")
+
+        # 5. Iniciales (CURP pos. 1-4) derivadas del nombre — heurístico (RENAPO tiene
+        #    excepciones: palabras inconvenientes, apellidos compuestos), solo warning.
+        full_name = (extracted_data.get("full_name") or "").upper()
+        particles = {"DE", "DEL", "LA", "LAS", "LOS", "Y", "MC", "MAC", "VAN", "VON", "D", "DA", "DI"}
+        tokens = [t for t in re.sub(r"[^A-ZÁÉÍÓÚÜÑ ]", " ", full_name).split() if t not in particles]
+        if len(tokens) >= 3:
+            trans = str.maketrans("ÁÉÍÓÚÜ", "AEIOUU")
+            paterno = tokens[0].translate(trans)
+            materno = tokens[1].translate(trans)
+            nombre = tokens[2].translate(trans)
+            if nombre in ("JOSE", "MARIA", "J", "MA") and len(tokens) >= 4:
+                nombre = tokens[3].translate(trans)
+            vocal = next((c for c in paterno[1:] if c in "AEIOU"), "X")
+            expected_ini = (paterno[0] + vocal + materno[0] + nombre[0]).replace("Ñ", "X")
+            if curp[:4] == expected_ini:
+                oks.append("iniciales ✓")
+            else:
+                warns.append(f"iniciales: CURP dice {curp[:4]}, del nombre se esperaría {expected_ini} (heurístico)")
+
+        if not (oks or mismatches or warns):
+            return self._skipped("curp_consistencia", "Sin campos comparables para validar la consistencia del CURP")
+
+        detail = " | ".join(mismatches + warns + oks)
+        if mismatches:
+            return self._failed(
+                "curp_consistencia",
+                f"CURP inconsistente con los datos del propio documento — en una INE genuina "
+                f"estos campos siempre cuadran; indicador de falsificación. {detail}",
+            )
+        if warns:
+            return self._warning("curp_consistencia", f"CURP con posibles inconsistencias menores — revisar manualmente. {detail}")
+        return self._passed("curp_consistencia", f"CURP consistente con el documento. {detail}")
 
     def _check_curp_name_crosscheck(self, curp: str, full_name: str) -> CheckItem:
         """
